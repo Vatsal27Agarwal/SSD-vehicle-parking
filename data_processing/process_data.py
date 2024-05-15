@@ -22,7 +22,11 @@ def img_annotation_classes(dataset):
 
     for annot_class, annot_set in zip(annotation_classes, annotation_sets):
         for img in annot_set:
-            annot_classes_dict[img].append(annot_class)
+            if img in annot_classes_dict:  # Check if the image exists in the dictionary
+                annot_classes_dict[img].append(annot_class)
+            else:
+                print(f"Image '{img}' not found in full_image_set.")
+
 
     with open(f'{dataset}/{dataset}/{dataset}_image_level_markup.json', "w") as outfile:
         json.dump(annot_classes_dict, outfile)
@@ -81,9 +85,9 @@ def patch_ilm(dataset):
         if image_path.split('.')[-1] == "jpg":
             annot_path = f"{int_markup_dir}/{image_path.split('.')[0]}.json"
             annot = json.load(open(annot_path))
-            for lot in annot:
+            for lot in annot["lots"]:
                 
-                class_dir = "Busy" if lot['label'] else "Free"                
+                class_dir = "Busy" if lot['label']==1 else "Free"                
                 crop_name = f"image_{count}.jpg"
                 
                 try:
@@ -94,8 +98,6 @@ def patch_ilm(dataset):
                 except:                    
                     error_count+=1
                     
-
-                
                 count += 1
 
 
@@ -157,31 +159,62 @@ def splitter(dataset, train_ratio=0.6, val_ratio=0.1, test_ratio=0.3):
     free_val = free_images[int(len(free_images)*train_ratio):int(len(free_images)*(train_ratio+val_ratio))]
     free_test = free_images[int(len(free_images)*(train_ratio+val_ratio)):]
 
+    print("Busy train:", len(busy_train))
+    print("Busy val:", len(busy_val))
+    print("Busy test:", len(busy_test))
+    print("Free train:", len(free_train))
+    print("Free val:", len(free_val))
+    print("Free test:", len(free_test))
+
     # move images
 
     for image in busy_train:
-        shutil.copy(f"{patch_dir}/Busy/{image}", f"{main_dir}/patch_splitted/train/Busy/{image}")
-        shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/train/Busy/{image}")
+        try:
+            shutil.copy(f"{patch_dir}/Busy/{image}", f"{main_dir}/patch_splitted/train/Busy/{image}")
+            # shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/train/Busy/{image}")
+        except FileNotFoundError:
+            print(f"busy_train : {image}")
+            continue
 
     for image in busy_val:
-        shutil.copy(f"{patch_dir}/Busy/{image}", f"{main_dir}/patch_splitted/val/Busy/{image}")
-        shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/val/Busy/{image}")
+        try:
+            shutil.copy(f"{patch_dir}/Busy/{image}", f"{main_dir}/patch_splitted/val/Busy/{image}")
+            # shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/val/Busy/{image}")
+        except FileNotFoundError:
+            print(f"busy_val: {image}")
+            continue
 
     for image in busy_test:
-        shutil.copy(f"{patch_dir}/Busy/{image}", f"{main_dir}/patch_splitted/test/Busy/{image}")
-        shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/test/Busy/{image}")
+        try:
+            shutil.copy(f"{patch_dir}/Busy/{image}", f"{main_dir}/patch_splitted/test/Busy/{image}")
+            # shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/test/Busy/{image}")
+        except FileNotFoundError:
+            print(f"busy_test: {image}")
+            continue
 
     for image in free_train:
-        shutil.copy(f"{patch_dir}/Free/{image}", f"{main_dir}/patch_splitted/train/Free/{image}")
-        shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/train/Free/{image}")
+        try:
+            shutil.copy(f"{patch_dir}/Free/{image}", f"{main_dir}/patch_splitted/train/Free/{image}")
+            # shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/train/Free/{image}")
+        except FileNotFoundError:
+            print(f"free_train: {image}")
+            continue
 
     for image in free_val:
-        shutil.copy(f"{patch_dir}/Free/{image}", f"{main_dir}/patch_splitted/val/Free/{image}")
-        shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/val/Free/{image}")
+        try:
+            shutil.copy(f"{patch_dir}/Free/{image}", f"{main_dir}/patch_splitted/val/Free/{image}")
+            # shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/val/Free/{image}")
+        except FileNotFoundError:
+            print(f"free_val: {image}")
+            continue
 
     for image in free_test:
-        shutil.copy(f"{patch_dir}/Free/{image}", f"{main_dir}/patch_splitted/test/Free/{image}")
-        shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/test/Free/{image}")
+        try:
+            shutil.copy(f"{patch_dir}/Free/{image}", f"{main_dir}/patch_splitted/test/Free/{image}")
+            # shutil.copy(f"{int_markup_dir}/{image}", f"{main_dir}/splitted_images/test/Free/{image}")
+        except FileNotFoundError:
+            print(f"free_test: {image}")
+            continue
 
     images_list = os.listdir(f"{main_dir}/images")
     random.shuffle(images_list)
@@ -249,6 +282,7 @@ def get_dataframe(dataset):
         for j in range(len(bbxs)):
 
             if bbxs[j]['label'] == 1:
+                print("working")
                 images.append(image_name)
                 folders.append(folder)
 
