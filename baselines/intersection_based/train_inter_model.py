@@ -1,10 +1,13 @@
+from utils.common_utils import seed_everything, get_device
+from utils.patch_utils import *
+from utils.inter_utils import *
 from inter_models import *
-from baselines.utils.common_utils import seed_everything, get_device
-from baselines.utils.inter_utils import *
 import pandas as pd
 import os
 import torch
 from torch.utils.data import DataLoader, Dataset
+
+import argparse
 
 seed_everything(seed=42)
 device = get_device()
@@ -27,13 +30,18 @@ else:
 
 model.to(device)
 
+# Directly store the path
+path_to_images = '/home/sdnx/Desktop/vatsal/Eighonet/parking-research/data_processing/PKLot/PKLot/'
+# Combine the path with the folder name
+DIR_INPUT = os.path.join(path_to_images, 'splitted_images/')
 
-DIR_INPUT = os.path.join(args.path, 'splitted_images/')
+# DIR_INPUT = os.path.join(args.path, 'splitted_images/')
 DIR_TRAIN = f'{DIR_INPUT}/train'
 DIR_VAL = f'{DIR_INPUT}/val'
 DIR_TEST = f'{DIR_INPUT}/test'
 
-dataframe = pd.read_csv(args.dataframe)
+dataframe_path = "./PKLot_dataframe.csv"
+dataframe = pd.read_csv(dataframe_path)
 
 train_df, valid_df = get_dataframes(dataframe)
 
@@ -42,17 +50,18 @@ train_dataset = ParkDataset(train_df, DIR_TRAIN, get_train_transform())
 valid_dataset = ParkDataset(valid_df, DIR_VAL, get_valid_transform())
 
 # split the dataset in train and test set
+batch_size=64
 indices = torch.randperm(len(train_dataset)).tolist()
 train_data_loader = DataLoader(
     train_dataset,
-    batch_size=args.batch_size,
+    batch_size=batch_size,
     shuffle=False,
     # num_workers=4,
     collate_fn=collate_fn
 )
 valid_data_loader = DataLoader(
     valid_dataset,
-    batch_size=args.batch_size,
+    batch_size=batch_size,
     shuffle=False,
     # num_workers=4,
     collate_fn=collate_fn
