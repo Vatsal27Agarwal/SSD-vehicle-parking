@@ -126,8 +126,8 @@ def get_malexnet():
 def get_mobilenet():
 
     # !git clone https://github.com/d-li14/mobilenetv2.pytorch.git
-    model = mobilenetv2()
-    model.load_state_dict(torch.load('pretrained/mobilenetv2-c5e733a8.pth'))
+    model = mobilenetv2.mobilenet_v2()
+    model.load_state_dict(torch.load('./pretrained/mobilenetv2-c5e733a8.pth'))
 
     for param in model.parameters():
         param.requires_grad = True
