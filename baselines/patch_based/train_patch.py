@@ -1,5 +1,9 @@
-from baselines.utils.common_utils import seed_everything, get_device
-from baselines.utils.patch_utils import *
+
+from utils.common_utils import seed_everything, get_device
+from utils.patch_utils import *
+
+# from ..utils.common_utils import seed_everything, get_device
+# from ..utils.patch_utils import *
 from conv_based_models import *
 from transformer_based_models import *
 from spt_lsa_vit import *
@@ -37,13 +41,15 @@ elif args.model_type == 'regular_vit':
 elif args.model_type == 'spt_lsa_vit':
     model, loss_func, optimizer = get_spt_lsa_vit()
 
+# Directly store the path
+path_to_images = '/home/sdnx/Desktop/vatsal/Eighonet/parking-research/data_processing/PKLot/PKLot/'
 
 if args.model_type != 'cfen':
-    train_data, valid_data, test_data = load_data(args.path, 32, image_transforms=image_transforms)
+    train_data, valid_data, test_data = load_data(path_to_images, 32, image_transforms=image_transforms)
     model.to(device)
     train_patch_model(model, loss_func, optimizer, train_data, valid_data)
 else:
-    train_data, valid_data = load_cfen_data(args.path)
+    train_data, valid_data = load_cfen_data(path_to_images)
     model, criterion, CEloss, optimizer = get_cfen()
     model.to(device)
     train_cfen_model(model, criterion, CEloss, optimizer, train_data, valid_data)
